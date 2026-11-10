@@ -46,14 +46,25 @@ fi
 # Step 1: Configure crontab for @reboot temporary directory initialization
 echo ""
 echo "[Step 1/6] Configuring @reboot cron job..."
+
+# Ensure crontab command exists (install cron if missing)
+if ! command -v crontab >/dev/null 2>&1; then
+    echo "crontab command not found. Installing cron..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt update -y && apt install -y cron
+fi
+
 CRON_JOB="@reboot ${SCRIPT_DIR}/install_temporary_directories.sh"
-if crontab -l 2>/dev/null | grep -Fq "${SCRIPT_DIR}/install_temporary_directories.sh"; then
+CURRENT_CRON="$(crontab -l 2>/dev/null || true)"
+
+if echo "${CURRENT_CRON}" | grep -Fq "${SCRIPT_DIR}/install_temporary_directories.sh"; then
     echo "Reboot cron job is already configured."
 else
     echo "Adding reboot cron job to crontab: ${CRON_JOB}"
-    (crontab -l 2>/dev/null; echo "${CRON_JOB}") | crontab -
+    printf "%s\n%s\n" "${CURRENT_CRON}" "${CRON_JOB}" | sed '/^[[:space:]]*$/d' | crontab -
     echo "Cron job registered successfully."
 fi
+systemctl enable --now cron 2>/dev/null || true
 
 # Step 2: Copy helper binaries to /usr/local/bin
 echo ""
@@ -69,7 +80,7 @@ echo "[Step 3/6] Updating package index and installing Nginx, Snapd, PHP, SQLite
 export DEBIAN_FRONTEND=noninteractive
 apt update
 apt upgrade -y
-apt install -y nginx snapd curl unzip sqlite3 php-fpm php-cli php-sqlite3
+apt install -y nginx snapd cron curl unzip sqlite3 php-fpm php-cli php-sqlite3
 
 # Step 4: Configure PHP runtime and timezone
 echo ""
