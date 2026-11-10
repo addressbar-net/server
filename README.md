@@ -53,13 +53,18 @@ This package is designed to run first on a fresh server before installing the `h
 
 ### Step 1: Provision the Server and Domain
 ```bash
+# Clone and run the server installer:
 git clone https://github.com/addressbar-net/server.git
 cd server
 sudo ./install.sh <your-domain.com>
+
+# Return to parent directory to keep repositories side-by-side:
+cd ..
 ```
 
 ### Step 2: Deploy the `hotletter.band` Package
 ```bash
+# Clone contact into its own sibling directory:
 git clone https://github.com/addressbar-net/contact.git
 cd contact
 
