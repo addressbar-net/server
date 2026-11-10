@@ -1,0 +1,21 @@
+#!/bin/bash
+# Prepares temporary directories and extracts server_1_HTML.tar into /tmp/html
+set -euo pipefail
+
+mkdir -p /tmp/log/nginx /tmp/html
+
+if [ -x /usr/local/bin/tmp_shed ]; then
+    /usr/local/bin/tmp_shed
+fi
+
+if [ -f /var/www/html/server_1_HTML.tar ]; then
+    cp /var/www/html/server_1_HTML.tar /tmp/html/
+    cd /tmp/html
+    if [ -x /usr/local/bin/Tar ]; then
+        /usr/local/bin/Tar x server_1_HTML.tar
+    else
+        tar -xvpf server_1_HTML.tar
+    fi
+else
+    echo "Notice: /var/www/html/server_1_HTML.tar not found."
+fi

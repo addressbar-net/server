@@ -1,0 +1,22 @@
+# ==============================================================================
+# .gitignore - addressbar-net/server
+# ==============================================================================
+
+# Logs
+*.log
+logs/
+
+# Backups & Archives
+*.tar
+*.bak
+*.tmp
+*.old
+
+# Editor & OS Artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

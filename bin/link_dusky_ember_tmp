@@ -1,0 +1,2 @@
+#!/bin/bash
+ln -sf /tmp/html/shed/dusky_ember/index.php .

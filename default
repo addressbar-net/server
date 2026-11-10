@@ -1,0 +1,33 @@
+##
+# Default server configuration for ressnet.addr.bar
+##
+
+server {
+	server_name ressnet.addr.bar;
+	access_log /tmp/log/nginx/ressnet.addr.bar.log;
+	etag on;
+	add_header Cache-Control "no-cache";
+
+	root /tmp/html/ressnet.addr.bar;
+	index index.php index.html;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+	location ~ \.php$ {
+		include snippets/fastcgi-php.conf;
+
+		# With php-fpm unix socket:
+		fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+	}
+
+	# Protect sensitive files and hidden files
+	location ~ /\. {
+		deny all;
+	}
+
+	location ~* \.(sqlite|sql|db|conf|log)$ {
+		deny all;
+	}
+}
