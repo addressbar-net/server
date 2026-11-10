@@ -4,7 +4,7 @@ set -euo pipefail
 
 mkdir -p /tmp/html/
 if [ -d /var/www/html/shed ]; then
-    cp -rv /var/www/html/shed /tmp/html/
+    cp -rf /var/www/html/shed /tmp/html/ 2>/dev/null || true
 else
     echo "Notice: /var/www/html/shed does not exist."
 fi

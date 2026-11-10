@@ -1,19 +1,30 @@
 #!/bin/bash
-# Helper script to create or extract archives with preserved access times
+# Helper script to create or extract archives with preserved permissions
 set -euo pipefail
 
 if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 [c|x] <target_or_archive_name>"
+    echo "Usage:"
+    echo "  $0 c <target>             - Creates <target>.tar from <target>"
+    echo "  $0 c <archive> <target>   - Creates <archive>.tar from <target>"
+    echo "  $0 x <archive_file>       - Extracts <archive_file>"
     exit 1
 fi
 
 ACTION="$1"
-TARGET="$2"
 
-if [ "${ACTION}" == "c" ]; then
-    tar --atime-preserve -cvpf "${TARGET}.tar" "${TARGET}"
-elif [ "${ACTION}" == "x" ]; then
-    tar -xvpf "${TARGET}"
+if [ "${ACTION}" = "c" ]; then
+    if [ "$#" -ge 3 ]; then
+        ARCHIVE="$2"
+        TARGET="$3"
+        [[ ! "$ARCHIVE" =~ \.tar$ ]] && ARCHIVE="${ARCHIVE}.tar"
+        tar -cvpf "${ARCHIVE}" "${TARGET}"
+    else
+        TARGET="$2"
+        tar -cvpf "${TARGET}.tar" "${TARGET}"
+    fi
+elif [ "${ACTION}" = "x" ]; then
+    ARCHIVE="$2"
+    tar -xvpf "${ARCHIVE}"
 else
     echo "Error: Unknown action '${ACTION}'. Use 'c' to create or 'x' to extract." >&2
     exit 1

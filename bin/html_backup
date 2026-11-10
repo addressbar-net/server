@@ -1,5 +1,5 @@
 #!/bin/bash
-# Archives /tmp/html into /var/www/html/server_1_HTML.tar
+# Archives /tmp/html into /var/www/html/server_1.tar
 set -euo pipefail
 
 if [ ! -d /tmp/html ]; then
@@ -7,14 +7,11 @@ if [ ! -d /tmp/html ]; then
     exit 1
 fi
 
-cd /tmp
-if command -v Tar >/dev/null 2>&1; then
-    Tar c html
-else
-    tar --atime-preserve -cvpf html.tar html
-fi
+mkdir -p /var/www/html
 
-if [ -f /tmp/html.tar ]; then
-    mv /tmp/html.tar /var/www/html/server_1_HTML.tar
-    echo "Successfully backed up /tmp/html to /var/www/html/server_1_HTML.tar"
-fi
+cd /tmp
+tar -cvpf /var/www/html/server_1.tar html
+cp -p /var/www/html/server_1.tar /var/www/html/server_1_HTML.tar 2>/dev/null || true
+chmod 644 /var/www/html/server_1.tar /var/www/html/server_1_HTML.tar 2>/dev/null || true
+
+echo "Successfully backed up /tmp/html to /var/www/html/server_1.tar"

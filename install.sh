@@ -172,6 +172,18 @@ else
     echo "or run the connected setup at any time with:"
     echo "   ${SCRIPT_DIR}/setup_nginx_certbot.sh <website_name>"
 fi
+
+# Step 8: Create backup of /tmp/html for reboot restoration
+echo ""
+echo "=========================================================="
+echo "Running html_backup to preserve /tmp/html to /var/www/html/server_1.tar..."
+if [ -x /usr/local/bin/html_backup ]; then
+    /usr/local/bin/html_backup
+elif [ -x "${SCRIPT_DIR}/bin/html_backup" ]; then
+    "${SCRIPT_DIR}/bin/html_backup"
+else
+    echo "Warning: html_backup script not found."
+fi
 echo "=========================================================="
 echo "Installation complete!"
 echo "=========================================================="

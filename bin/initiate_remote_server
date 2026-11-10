@@ -1,21 +1,29 @@
 #!/bin/bash
-# Prepares temporary directories and extracts server_1_HTML.tar into /tmp/html
+# Prepares temporary directories and extracts backup archive into /tmp/html
 set -euo pipefail
 
 mkdir -p /tmp/log/nginx /tmp/html
 
 if [ -x /usr/local/bin/tmp_shed ]; then
-    /usr/local/bin/tmp_shed
+    /usr/local/bin/tmp_shed || true
 fi
 
-if [ -f /var/www/html/server_1_HTML.tar ]; then
-    cp /var/www/html/server_1_HTML.tar /tmp/html/
-    cd /tmp/html
-    if [ -x /usr/local/bin/Tar ]; then
-        /usr/local/bin/Tar x server_1_HTML.tar
-    else
-        tar -xvpf server_1_HTML.tar
+ARCHIVE=""
+for candidate in /var/www/html/server_1.tar /var/www/html/server_1_HTML.tar /var/www/html/html.tar; do
+    if [ -f "$candidate" ]; then
+        ARCHIVE="$candidate"
+        break
     fi
+done
+
+if [ -n "$ARCHIVE" ]; then
+    echo "Found ${ARCHIVE}. Restoring files to /tmp/html..."
+    cp "$ARCHIVE" /tmp/restore_html.tar
+    tar --overwrite -xpf /tmp/restore_html.tar -C /tmp
+    rm -f /tmp/restore_html.tar
+    chmod 755 /tmp/html /tmp/log/nginx 2>/dev/null || true
+    chown -R www-data:www-data /tmp/html /tmp/log/nginx 2>/dev/null || true
+    echo "Successfully restored /tmp/html from ${ARCHIVE}"
 else
-    echo "Notice: /var/www/html/server_1_HTML.tar not found."
+    echo "Notice: No backup archive found in /var/www/html (checked server_1.tar, server_1_HTML.tar, html.tar)."
 fi

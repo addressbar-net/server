@@ -89,8 +89,8 @@ Because `server` has already installed PHP-FPM, SQLite3, Nginx, and SSL, `contac
 The following helper scripts are automatically copied to `/usr/local/bin` during installation:
 
 * **`Tar`**: Helper script to create (`Tar c <name>`) or extract (`Tar x <name>.tar`) tar archives while preserving file access times.
-* **`html_backup`**: Creates an archive of `/tmp/html` and saves it to `/var/www/html/server_1_HTML.tar`.
-* **`initiate_remote_server`**: Restores temporary directories and extracts `/var/www/html/server_1_HTML.tar` back into `/tmp/html`.
+* **`html_backup`**: Creates an archive of `/tmp/html` and saves it to `/var/www/html/server_1.tar`.
+* **`initiate_remote_server`**: Restores temporary directories and extracts `/var/www/html/server_1.tar` back into `/tmp/html`.
 * **`tmp_shed`**: Copies web files from `/var/www/html/shed` to `/tmp/html/`.
 * **`link_*`**: Helper symlink scripts (`link_global_index_tmp`, `link_dusky_ember_tmp`, `link_eternalcursive_tmp`).
 
