@@ -18,10 +18,12 @@ git clone https://github.com/addressbar-net/server.git
 cd server
 
 # 2. Run the installer (interactive or pass your domain directly)
-sudo ./install.sh hotletter.neolamia.com
+sudo ./install.sh example.com
 ```
 
-If run without arguments, `install.sh` will prompt for an optional website domain name. If skipped, base packages, PHP-FPM, and directory structures are installed, allowing you to configure Nginx and SSL later using `./setup_nginx_certbot.sh`.
+If run without arguments (`sudo ./install.sh`), the script prompts for an optional website domain name:
+- If you enter a domain (e.g. `example.com`), it automatically creates the document root `/tmp/html/example.com`, configures Nginx, and runs Certbot for SSL.
+- If left blank (press Enter), base packages, PHP-FPM runtime, crontab reboot jobs, and helper binaries are installed, allowing you to configure Nginx and SSL later using `./setup_nginx_certbot.sh <domain>`.
 
 ---
 
@@ -47,13 +49,13 @@ If run without arguments, `install.sh` will prompt for an optional website domai
 
 ## 🔗 Deploying with `hotletter.band` (Contact Package)
 
-This package is designed to run first on a fresh server before installing the `hotletter.band` package (`/addr.bar/tricurse/contact`).
+This package is designed to run first on a fresh server before installing the `hotletter.band` package (`contact`).
 
 ### Step 1: Provision the Server and Domain
 ```bash
 git clone https://github.com/addressbar-net/server.git
 cd server
-sudo ./install.sh hotletter.neolamia.com
+sudo ./install.sh <your-domain.com>
 ```
 
 ### Step 2: Deploy the `hotletter.band` Package
@@ -66,8 +68,8 @@ sudo ./install.sh
 
 # Or non-interactive one-liner targeting the configured web root:
 sudo ./install.sh \
-  -D hotletter.neolamia.com \
-  -d /tmp/html/hotletter.neolamia.com \
+  -D <your-domain.com> \
+  -d /tmp/html/<your-domain.com> \
   -m /var/lib/tricurse/contact \
   -p 'YourSecurePassword123' \
   -H -y
@@ -86,17 +88,6 @@ The following helper scripts are automatically copied to `/usr/local/bin` during
 * **`initiate_remote_server`**: Restores temporary directories and extracts `/var/www/html/server_1_HTML.tar` back into `/tmp/html`.
 * **`tmp_shed`**: Copies web files from `/var/www/html/shed` to `/tmp/html/`.
 * **`link_*`**: Helper symlink scripts (`link_global_index_tmp`, `link_dusky_ember_tmp`, `link_eternalcursive_tmp`).
-
----
-
-## 🌐 Dark World Multiplayer Server (`server.js`)
-
-`server.js` contains the standalone Node.js dual-protocol (HTTP/WS and HTTPS/WSS) multiplayer synchronization server operating on port `8080` for real-time 2D top-down coordinates.
-
-Run standalone:
-```bash
-node server.js
-```
 
 ---
 

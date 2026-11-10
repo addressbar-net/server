@@ -123,5 +123,5 @@ sudo ./setup_nginx_certbot.sh
 - **Proper PHP Timezone Syntax**:
   PHP timezone is automatically configured to `America/New_York` (representing EDT / Eastern Daylight Time). IANA timezone identifiers do not use spaces; `America/New_York` avoids `PHP Startup: Invalid date.timezone value 'America/New York'` errors.
 - **Subdomain Routing & Hotletter Package Deployment**:
-  1. Setting up `hotletter.neolamia.com` by running `./install.sh hotletter.neolamia.com` configures the web root at `/tmp/html/hotletter.neolamia.com`, sets up Nginx with PHP-FPM, and acquires SSL.
+  1. Setting up a domain by running `./install.sh <domain>` configures the web root at `/tmp/html/<domain>`, sets up Nginx with PHP-FPM, and acquires SSL.
   2. Running the `https://hotletter.band` package installer (`/addr.bar/tricurse/contact/install.sh`) next detects the existing Nginx site and deploys directly into the configured document root, connecting to persistent SQLite message storage.
