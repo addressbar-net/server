@@ -42,7 +42,9 @@ If run without arguments (`sudo ./install.sh`), the script prompts for an option
 7. **Temporary Directory Structure**: Prepares `/tmp/html` and `/tmp/log/nginx` with `755` permissions and `www-data:www-data` ownership.
 8. **Automated Nginx Virtual Host & SSL** (when domain is provided):
    - Creates document root `/tmp/html/<website_name>`.
-   - Writes `/etc/nginx/sites-available/default` configured with FastCGI PHP pass (`unix:/run/php/php<version>-fpm.sock`), prioritizing `index.php`, and blocking public access to SQLite database files.
+   - Writes `/etc/nginx/sites-available/neolamia_com.conf` configured with `server_name <domain> _;`, FastCGI PHP pass (`unix:/run/php/php<version>-fpm.sock`), prioritizing `index.php`, and blocking public access to SQLite database files.
+   - Preserves the host's original `/etc/nginx/sites-available/default` untouched, and unlinks `/etc/nginx/sites-enabled/default` to prevent duplicate server warnings.
+   - Symlinks `/etc/nginx/sites-enabled/neolamia_com.conf`.
    - Requests and binds a Let's Encrypt SSL certificate via `certbot --nginx -d <website_name>`.
 
 ---

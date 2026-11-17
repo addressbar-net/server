@@ -65,7 +65,7 @@ The variable can be specified in two ways:
 | Procedure / Script | When `WEBSITE_NAME` is Specified (`example.com`) | When `WEBSITE_NAME` is NOT Specified (`""`) |
 | :--- | :--- | :--- |
 | **Directory Initialization** ([install_temporary_directories.sh](file:///addr.bar/tricurse/server/install_temporary_directories.sh)) | Creates `/tmp/html`, `/tmp/log/nginx`, and the site directory `/tmp/html/example.com` with `755` permissions and `www-data` ownership. Restores `/tmp/html` from `/var/www/html/server_1.tar` if present. | Creates base `/tmp/html` and `/tmp/log/nginx`. Restores `/tmp/html` from `/var/www/html/server_1.tar` if present. Does not create a named site folder. |
-| **Nginx Default Configuration** ([setup_nginx_certbot.sh](file:///addr.bar/tricurse/server/setup_nginx_certbot.sh)) | **Executed**: Backs up original config to `default_0`. Generates `/etc/nginx/sites-available/default` (and local [default](file:///addr.bar/tricurse/server/default)) configured to serve from `/tmp/html/example.com`, prioritizes `index.php`, protects SQLite/hidden files, tests syntax (`nginx -t`), and reloads Nginx. | **Skipped**: `/etc/nginx/sites-available/default` is left untouched. You can configure virtual hosts or default settings manually. |
+| **Nginx Site Configuration** ([setup_nginx_certbot.sh](file:///addr.bar/tricurse/server/setup_nginx_certbot.sh)) | **Executed**: Preserves original `/etc/nginx/sites-available/default` untouched. Generates `/etc/nginx/sites-available/neolamia_com.conf` with `server_name example.com _;`, unlinks `/etc/nginx/sites-enabled/default` to prevent conflicts, symlinks `neolamia_com.conf` into `sites-enabled`, tests syntax (`nginx -t`), and reloads Nginx. | **Skipped**: `/etc/nginx/sites-available/default` is left untouched. You can configure virtual hosts or default settings manually. |
 | **Certbot SSL Registration** ([setup_nginx_certbot.sh](file:///addr.bar/tricurse/server/setup_nginx_certbot.sh)) | **Executed**: Runs `certbot --nginx -d example.com` to request and bind an SSL certificate automatically. | **Skipped**: Certbot is not executed, preventing empty-domain failures or unwanted interactive prompts. |
 | **System Packages** ([install.sh](file:///addr.bar/tricurse/server/install.sh)) | **Executed**: Installs Nginx, Snapd, Certbot binary, curl, unzip, SQLite3, PHP-FPM, PHP-CLI, PHP-SQLite3, and helper scripts in `/usr/local/bin`. (No fail2ban, no MySQL/MariaDB). | **Executed**: Identical base setup is performed. The server environment is fully installed. |
 | **PHP Runtime & Timezone** ([install.sh](file:///addr.bar/tricurse/server/install.sh)) | **Executed**: Detects PHP version, enables PHP-FPM socket, configures `date.timezone = America/New_York` (EDT) across all `php.ini` files, aligns system timezone, and starts PHP-FPM. | **Executed**: Identical. PHP-FPM runtime and timezone are ready regardless of site name. |
@@ -86,14 +86,15 @@ Both steps are encapsulated in [setup_nginx_certbot.sh](file:///addr.bar/tricurs
 2. **PHP-FPM Socket Detection**:
    Automatically detects the active PHP version (e.g. `8.2` or `8.5`) to write the correct `fastcgi_pass unix:/run/php/php<version>-fpm.sock;` directive.
 3. **Nginx Configuration Generation**:
-   Generates `/etc/nginx/sites-available/default` with:
-   - `server_name ${WEBSITE_NAME};`
+   Generates `/etc/nginx/sites-available/neolamia_com.conf` with:
+   - Commented header explanation of architecture and purpose.
+   - `server_name ${WEBSITE_NAME} _;` (with `_` generic catch-all)
    - `access_log /tmp/log/nginx/${WEBSITE_NAME}.log;`
    - `root /tmp/html/${WEBSITE_NAME};`
    - `index index.php index.html;` (PHP entry prioritized)
    - FastCGI PHP configuration matching the installed PHP version.
    - Built-in location protection for SQLite database files (`.sqlite`, `.db`, `.sql`) and dotfiles.
-   Enables the site via symlink in `/etc/nginx/sites-enabled/` and tests with `nginx -t`.
+   Preserves the original `/etc/nginx/sites-available/default` untouched, removes `/etc/nginx/sites-enabled/default` to prevent `conflicting server name` warnings, and symlinks `neolamia_com.conf` into `/etc/nginx/sites-enabled/`. Tests syntax with `nginx -t` and reloads Nginx.
 4. **Certbot Execution**:
    Calls `certbot --nginx -d "${WEBSITE_NAME}"`.
 

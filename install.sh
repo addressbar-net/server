@@ -24,10 +24,11 @@ if [ -z "${WEBSITE_NAME}" ]; then
     echo "Website Configuration:"
     echo "  - If you enter a website name (e.g. example.com):"
     echo "      1. Directory /tmp/html/<website_name> will be created."
-    echo "      2. Nginx default configuration will be updated."
-    echo "      3. Certbot will be run for the specified website."
+    echo "      2. Nginx site config (/etc/nginx/sites-available/neolamia_com.conf) will be created and enabled."
+    echo "      3. The default symlink (/etc/nginx/sites-enabled/default) will be unlinked to prevent conflicts."
+    echo "      4. Certbot will be run for the specified website."
     echo "  - If left blank (press Enter):"
-    echo "      1. Nginx default file will NOT be modified (can be updated manually)."
+    echo "      1. Nginx files will NOT be modified (original default remains untouched)."
     echo "      2. Certbot will NOT be run."
     echo "      (Both can be run together later with ./setup_nginx_certbot.sh)"
     echo ""
@@ -157,18 +158,19 @@ systemctl enable --now snapd.apparmor snapd.socket || true
 snap install --classic certbot || true
 ln -sf /snap/bin/certbot /usr/bin/certbot || true
 
-# Step 7: Conditional Nginx default site configuration and Certbot run
+# Step 7: Conditional Nginx site configuration (neolamia_com.conf) and Certbot run
 echo ""
 echo "=========================================================="
 if [ -n "${WEBSITE_NAME}" ]; then
-    echo "Configuring Nginx default configuration and Certbot for: ${WEBSITE_NAME}"
+    echo "Configuring Nginx site (neolamia_com.conf) and Certbot for: ${WEBSITE_NAME}"
     "${SCRIPT_DIR}/setup_nginx_certbot.sh" "${WEBSITE_NAME}"
 else
     echo "Website name was NOT specified."
-    echo " - Nginx default file (/etc/nginx/sites-available/default) was NOT modified."
+    echo " - Nginx site file (/etc/nginx/sites-available/neolamia_com.conf) was NOT created."
+    echo " - Original default config (/etc/nginx/sites-available/default) remains untouched."
     echo " - Certbot was NOT run."
     echo ""
-    echo "You can manually configure /etc/nginx/sites-available/default,"
+    echo "You can manually configure /etc/nginx/sites-available/neolamia_com.conf,"
     echo "or run the connected setup at any time with:"
     echo "   ${SCRIPT_DIR}/setup_nginx_certbot.sh <website_name>"
 fi

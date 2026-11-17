@@ -111,21 +111,43 @@ if [ -z "${PHP_VERSION}" ]; then
 fi
 echo "Using PHP version: ${PHP_VERSION}"
 
-# 3. Update Nginx configuration file (/etc/nginx/sites-available/default)
-echo "[3/4] Updating /etc/nginx/sites-available/default..."
-if [ -f /etc/nginx/sites-available/default ] && [ ! -f /etc/nginx/sites-available/default_0 ]; then
-    cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default_0
-    echo "Backed up original default file to /etc/nginx/sites-available/default_0"
+# 3. Create Nginx site configuration (/etc/nginx/sites-available/neolamia_com.conf)
+echo "[3/4] Creating /etc/nginx/sites-available/neolamia_com.conf..."
+
+# Keep the original /etc/nginx/sites-available/default intact
+if [ -f /etc/nginx/sites-available/default ]; then
+    echo "Original default file at /etc/nginx/sites-available/default is preserved."
 fi
 
-NGINX_CONF="/etc/nginx/sites-available/default"
+NGINX_CONF="/etc/nginx/sites-available/neolamia_com.conf"
+SERVER_NAMES="${WEBSITE_NAME}"
+if [ "${WEBSITE_NAME}" != "_" ]; then
+    SERVER_NAMES="${WEBSITE_NAME} _"
+fi
+
 cat <<EOF > "${NGINX_CONF}"
 ##
-# Default server configuration for ${WEBSITE_NAME}
+# ==============================================================================
+# neolamia_com.conf - Nginx Site Configuration (neolamia.com / server suite)
+# ==============================================================================
+# Explanation:
+# 1. This configuration replaces the active distribution default site without
+#    modifying the original default template.
+# 2. To avoid Nginx 'conflicting server name' warnings on port 80/443:
+#    - The original /etc/nginx/sites-available/default file is preserved untouched.
+#    - The active symlink /etc/nginx/sites-enabled/default is removed upon installation.
+#    - This file (/etc/nginx/sites-available/neolamia_com.conf) is symlinked to
+#      /etc/nginx/sites-enabled/neolamia_com.conf.
+# 3. 'server_name' includes '_' as a catch-all fallback so requests without a
+#    matching Host header resolve properly to this server.
+# 4. Serves document root from /tmp/html/${WEBSITE_NAME} with FastCGI PHP processing,
+#    reboot persistence, and strict restrictions blocking direct access to
+#    hidden files and SQLite databases (.sqlite, .db, .sql, .conf, .log).
+# ==============================================================================
 ##
 
 server {
-	server_name ${WEBSITE_NAME};
+	server_name ${SERVER_NAMES};
 	access_log /tmp/log/nginx/${WEBSITE_NAME}.log;
 	etag on;
 	add_header Cache-Control "no-cache";
@@ -155,12 +177,18 @@ server {
 }
 EOF
 
-# Update repository default file to mirror current configuration
-cp "${NGINX_CONF}" "${SCRIPT_DIR}/default"
-
-# Ensure site is enabled
+# Ensure sites-enabled directory exists
 mkdir -p /etc/nginx/sites-enabled
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+# Remove the default symlink from /etc/nginx/sites-enabled/ to avoid conflicting server_name warnings
+if [ -L /etc/nginx/sites-enabled/default ] || [ -f /etc/nginx/sites-enabled/default ]; then
+    rm -f /etc/nginx/sites-enabled/default
+    echo "Removed default symlink from /etc/nginx/sites-enabled/ (original default preserved in sites-available)."
+fi
+
+# Symlink new configuration as neolamia_com.conf in sites-enabled
+ln -sf /etc/nginx/sites-available/neolamia_com.conf /etc/nginx/sites-enabled/neolamia_com.conf
+echo "Symlinked /etc/nginx/sites-available/neolamia_com.conf -> /etc/nginx/sites-enabled/neolamia_com.conf"
 
 # Test and reload Nginx
 if nginx -t; then
@@ -190,5 +218,6 @@ fi
 echo "=========================================================="
 echo "Nginx & Certbot setup complete for: ${WEBSITE_NAME}"
 echo "Document root: /tmp/html/${WEBSITE_NAME}"
-echo "Nginx default: /etc/nginx/sites-available/default"
+echo "Nginx config: /etc/nginx/sites-available/neolamia_com.conf (symlinked to sites-enabled)"
+echo "Original default: /etc/nginx/sites-available/default (preserved, unlinked from sites-enabled)"
 echo "=========================================================="
