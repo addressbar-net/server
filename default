@@ -28,6 +28,8 @@ server {
 	}
 
 	location ~ \.php$ {
+		etag on;
+		add_header 'Cache-Control' 'no-cache' always;
 		include snippets/fastcgi-php.conf;
 
 		# With php-fpm unix socket:
